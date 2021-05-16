@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+  webserver:
+    container_name: webserver
+    hostname: webserver
+    restart: on-failure
+    image: nginx
+    volumes:
+      - ./webserver/config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./webserver/config/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./webserver/static:/usr/share/nginx/html:ro
+    ports:
+      - 8080:80
+    networks:
+      - nginx_network
+
+  reverse_proxy:
+    container_name: reverse_proxy
+    hostname: reverse_proxy
+    restart: on-failure
+    image: nginx
+    volumes:
+      - ./reverse_proxy/config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./reverse_proxy/config/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./reverse_proxy/static:/usr/share/nginx/html:ro
+    ports:
+      - 8081:80
+    networks:
+      - nginx_network
+
+  api_gateway:
+    container_name: api_gateway
+    hostname: api_gateway
+    restart: on-failure
+    image: nginx
+    volumes:
+      - ./api_gateway/config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./api_gateway/config/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./api_gateway/config/services.conf:/etc/nginx/conf.d/services.conf:ro
+      - ./api_gateway/static:/usr/share/nginx/html:ro
+    ports:
+      - 8082:80
+      - 8001:8001
+      - 8002:8002
+    networks:
+      - nginx_network
+
+  load_balancer:
+    container_name: load_balancer
+    hostname: load_balancer
+    restart: on-failure
+    image: nginx
+    volumes:
+      - ./load_balancer/config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./load_balancer/config/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./load_balancer/config/services.conf:/etc/nginx/conf.d/services.conf:ro
+      - ./load_balancer/static:/usr/share/nginx/html:ro
+    ports:
+      - 8083:80
+      - 8100:80
+      - 8200:80
+    networks:
+      - nginx_network
+
+networks:
+  nginx_network:
